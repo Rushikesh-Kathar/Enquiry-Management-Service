@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { enquiryCustomer, getEnquiries, getCarModels, getEnquiryById, getEnquiryBySearch, updateEnquiryService } from '../services/enquiryService'
+import { enquiryCustomer, getEnquiries, getCarModels, getEnquiryById, getEnquiryBySearch, updateEnquiryService, deleteEnquiryService } from '../services/enquiryService'
 
 
 export const enquiryController = async (req: Request, res: Response): Promise<void> => {
@@ -115,3 +115,27 @@ export const updateEnquiryController = async (req: Request<{ id: string }>, res:
         res.status(500).json({ err: err.message });
     }
 }
+
+export const deleteUserController = async (
+    req: Request<{ id: string }>,
+    res: Response
+): Promise<void> => {
+    try {
+        const custId = req.params.id;
+
+        await deleteEnquiryService(custId);
+        res.status(200).json({
+            message: "Enquiry deleted successfully"
+        });
+    } catch (error: any) {
+        if (error.message === "Enquiry not found") {
+            res.status(404).json({ message: error.message });
+            return;
+        }
+        if (error.message === "Forbidden") {
+            res.status(403).json({ message: error.message });
+            return;
+        }
+        res.status(500).json({ message: "Internal server error" });
+    }
+};

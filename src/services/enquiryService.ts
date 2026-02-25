@@ -79,6 +79,9 @@ export const getEnquiries = async () => {
         const [enquires] = await connection.query<RowDataPacket[]>(
             'SELECT * FROM enquiries'
         );
+        if (enquires.length === 0) {
+            throw new Error('No enquiries found');
+        }
         return enquires;
     } catch (err: any) {
         await connection.rollback();
@@ -120,6 +123,9 @@ export const getEnquiryById = async (id: string) => {
             'SELECT * FROM enquiries WHERE id=?',
             [id]
         )
+        if (enquires.length == 0) {
+            throw new Error('Enquiry not found');
+        }
         return enquires;
 
     } catch (err: any) {
@@ -232,3 +238,24 @@ export const updateEnquiryService = async (
         connection.release();
     }
 };
+
+
+export const deleteEnquiryService = async (custId: string) => {
+    const connection = await conn.getConnection();
+
+    try {
+        const [result]: any = await connection.execute(
+            "DELETE FROM enquiries WHERE id = ?",
+            [custId]
+        );
+
+        if (result.affectedRows === 0) {
+            throw new Error("Enquiry not found");
+        }
+
+        return true;
+    } finally {
+        connection.release();
+    }
+};
+
